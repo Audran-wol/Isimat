@@ -103,5 +103,57 @@
     });
   });
 
+  // Contact form - WhatsApp integration
+  $(document).ready(function () {
+    var $contactForm = $('#contactForm');
+    if ($contactForm.length === 0) {
+      return;
+    }
+
+    var rawPhone = ($contactForm.data('whatsapp-phone') || '').toString();
+    var whatsappPhone = rawPhone.replace(/\D/g, '');
+
+    if (!whatsappPhone) {
+      return;
+    }
+
+    $contactForm.on('submit', function (event) {
+      var $form = $(this);
+      var formData = {
+        name: $.trim($form.find('[name="name"]').val() || ''),
+        email: $.trim($form.find('[name="mail"]').val() || ''),
+        subject: $.trim($form.find('[name="subject"]').val() || ''),
+        message: $.trim($form.find('[name="message"]').val() || '')
+      };
+
+      if (!formData.message) {
+        event.preventDefault();
+        alert('Please enter your message before sending.');
+        return;
+      }
+
+      var messageLines = [];
+      if (formData.name) {
+        messageLines.push('Name: ' + formData.name);
+      }
+      if (formData.email) {
+        messageLines.push('Email: ' + formData.email);
+      }
+      if (formData.subject) {
+        messageLines.push('Subject: ' + formData.subject);
+      }
+      messageLines.push('Message: ' + formData.message);
+
+      var whatsappMessage = encodeURIComponent(messageLines.join('\n'));
+      var whatsappUrl = 'https://api.whatsapp.com/send?phone=' + whatsappPhone + '&text=' + whatsappMessage;
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+
+      var formAction = ($form.attr('action') || '').trim();
+      if (formAction === '' || formAction === '#') {
+        event.preventDefault();
+      }
+    });
+  });
+
 
 })(jQuery);
